@@ -2,8 +2,8 @@
 dependencies: []
 
 galaxy_info:
-  author: geerlingguy
-  description: MySQL server for RHEL/CentOS and Debian/Ubuntu.
+  author: bpresles
+  description: MySQL server for RHEL/CentOS and Debian/Ubuntu on Docker container.
   company: "Midwestern Mac, LLC"
   license: "license (BSD, MIT)"
   min_ansible_version: 2.2
