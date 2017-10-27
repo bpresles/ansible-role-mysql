@@ -34,6 +34,22 @@
     warn: no
   when: mysql_slow_query_log_enabled
 
+- name: Remove data dir to reinitialize MySQL
+  file:
+    path: "{{ mysql_datadir }}"
+    state: absent
+
+- name: Create /var/run/mysqld if not exists
+  file:
+    path: "/var/run/mysqld"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode:  0755
+
+- name: Initialize MySQL
+  command: mysqld --initialize-insecure
+
 - name: Create datadir if it does not exist
   file:
     path: "{{ mysql_datadir }}"
@@ -69,5 +85,13 @@
   when: mysql_log == "" and mysql_log_error != ""
 
 - name: Starting mysql (temp).
-  command: "mysqld_safe"
+  shell: "mysqld_safe &"
+  become: true
+  become_method: su
+  become_user: mysql
+  become_flags: '-s /bin/sh'
+
+- name: Wait until the file /var/run/mysqld/mysqld.sock is present before continuing
+  wait_for:
+    path: /var/run/mysqld/mysqld.sock
   register: mysql_service_configuration
