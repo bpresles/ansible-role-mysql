@@ -37,6 +37,11 @@
     mysql_syslog_tag: "{{ __mysql_syslog_tag }}"
   when: mysql_syslog_tag is not defined
 
+- name: Define mysql_run_dir.
+  set_fact:
+    mysql_run_dir: "{{ __mysql_run_dir }}"
+  when: mysql_run_dir is not defined
+
 - name: Define mysql_pid_file.
   set_fact:
     mysql_pid_file: "{{ __mysql_pid_file }}"
