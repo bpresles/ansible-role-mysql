@@ -6,3 +6,32 @@
 
 - name: Ensure MySQL Python libraries are installed.
   yum: "name=MySQL-python state=installed enablerepo={{ mysql_enablerepo }}"
+
+- name: Remove datadir to reinitialize MySQL
+  file:
+    path: "{{ mysql_datadir }}"
+    state: absent
+
+- name: Create datadir if it does not exist
+  file:
+    path: "{{ mysql_datadir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode:  0755
+    setype: mysqld_db_t
+
+- name: Create rundir if it does not exists
+  file:
+    path: "{{ mysql_run_dir }}"
+    state: directory
+    owner: mysql
+    group: mysql
+    mode:  0755
+
+- name: Initialize MySQL.
+  shell: "mysql_install_db --datadir=\"{{ mysql_datadir }}\" --rpm"
+  become: true
+  become_method: su
+  become_user: mysql
+  become_flags: '-s /bin/sh'

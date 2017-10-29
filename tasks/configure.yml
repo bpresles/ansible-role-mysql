@@ -59,25 +59,6 @@
     mode: 0640
   when: mysql_log == "" and mysql_log_error != ""
 
-- name: Remove datadir to reinitialize MySQL
-  file:
-    path: "{{ mysql_datadir }}"
-    state: absent
-  when: ansible_os_family != 'Archlinux'
-
-- name: Create rundir if it does not exists
-  file:
-    path: "{{ mysql_run_dir }}"
-    state: directory
-    owner: mysql
-    group: mysql
-    mode:  0755
-  when: ansible_os_family != 'Archlinux'
-
-- name: Initialize MySQL
-  command: mysqld --initialize-insecure
-  when: ansible_os_family != 'Archlinux'
-
 - name: Create datadir if it does not exist
   file:
     path: "{{ mysql_datadir }}"
@@ -87,14 +68,23 @@
     mode:  0755
     setype: mysqld_db_t
 
-- name: Starting mysql (temp).
+- name: Starting mysql (temp) - Debian.
   shell: "mysqld_safe &"
   become: true
   become_method: su
   become_user: mysql
   become_flags: '-s /bin/sh'
+  when: ansible_os_family == 'Debian'
 
-- name: Wait until the file /var/run/mysqld/mysqld.sock is present before continuing
+- name: Starting mysql (temp) - RedHat.
+  shell: "mysqld_safe --basedir=/usr &"
+  become: true
+  become_method: su
+  become_user: mysql
+  become_flags: '-s /bin/sh'
+  when: ansible_os_family == 'RedHat'
+
+- name: Wait until the file mysqld.sock is present before continuing
   wait_for:
-    path: /var/run/mysqld/mysqld.sock
+    path: "{{ mysql_socket }}"
   register: mysql_service_configuration
