@@ -18,25 +18,9 @@
 # Because Ubuntu starts MySQL as part of the install process, we need to stop
 # mysql and remove the logfiles in case the user set a custom log file size.
 - name: Ensure MySQL is stopped after initial install.
-  command: "mysqladmin -u root shutdown"
+  command: "/usr/bin/mysqladmin --defaults-file=/etc/mysql/debian.cnf shutdown"
   when: mysql_installed.stat.exists == false
   ignore_errors: yes
-
-- name: Remove datadir to reinitialize MySQL
-  file:
-    path: "{{ mysql_datadir }}"
-    state: absent
-
-- name: Create rundir if it does not exists
-  file:
-    path: "{{ mysql_run_dir }}"
-    state: directory
-    owner: mysql
-    group: mysql
-    mode:  0755
-
-- name: Initialize MySQL
-  command: mysqld --initialize-insecure
 
 - name: Delete innodb log files created by apt package after initial install.
   file: path={{ mysql_datadir }}/{{item}} state=absent
